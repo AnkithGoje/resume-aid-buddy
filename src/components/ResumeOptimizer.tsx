@@ -35,8 +35,8 @@ const ResumeOptimizer = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!targetRole || !jobDescription || !experienceLevel || !resumeFile) {
-      toast.error("Please fill in all fields");
+    if (!targetRole || !resumeFile) {
+      toast.error("Please fill in target role and upload your resume");
       return;
     }
 
@@ -46,8 +46,8 @@ const ResumeOptimizer = () => {
     try {
       const formData = new FormData();
       formData.append("targetRole", targetRole);
-      formData.append("jobDescription", jobDescription);
-      formData.append("experienceLevel", experienceLevel);
+      if (jobDescription) formData.append("jobDescription", jobDescription);
+      if (experienceLevel) formData.append("experienceLevel", experienceLevel);
       formData.append("resume", resumeFile);
 
       const response = await fetch(
@@ -147,7 +147,7 @@ const ResumeOptimizer = () => {
                 </div>
                 <div className="flex-1">
                   <Label htmlFor="jobDescription" className="text-lg font-semibold mb-2 block">
-                    Share the job description
+                    Share the job description <span className="text-muted-foreground font-normal">(Optional)</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mb-3">
                     Paste the full job description so we can tailor your resume perfectly.
@@ -170,7 +170,7 @@ const ResumeOptimizer = () => {
                 </div>
                 <div className="flex-1">
                   <Label htmlFor="experienceLevel" className="text-lg font-semibold mb-2 block">
-                    Your experience level
+                    Your experience level <span className="text-muted-foreground font-normal">(Optional)</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mb-3">
                     This helps us customize the format and content for your career stage.
