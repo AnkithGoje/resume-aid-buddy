@@ -108,9 +108,20 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
 
             <div>
               <h3 className="font-semibold mb-2">Optimization Strategy</h3>
-              <p className="text-muted-foreground">
-                {strategic_assessment?.optimization_strategy_applied}
-              </p>
+              {Array.isArray(strategic_assessment?.optimization_strategy_applied) ? (
+                <ul className="space-y-2">
+                  {strategic_assessment.optimization_strategy_applied.map((strategy: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{strategy}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">
+                  {strategic_assessment?.optimization_strategy_applied}
+                </p>
+              )}
             </div>
           </div>
 
@@ -132,7 +143,8 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
             <h2 className="text-2xl font-bold">Your Optimized Resume</h2>
             <Button
               onClick={() => {
-                const blob = new Blob([optimized_resume?.content], { type: "text/markdown" });
+                const content = typeof optimized_resume === 'string' ? optimized_resume : optimized_resume?.content;
+                const blob = new Blob([content], { type: "text/markdown" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
@@ -161,7 +173,7 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
                 ),
               }}
             >
-              {optimized_resume?.content}
+              {typeof optimized_resume === 'string' ? optimized_resume : optimized_resume?.content}
             </ReactMarkdown>
           </div>
         </Card>
