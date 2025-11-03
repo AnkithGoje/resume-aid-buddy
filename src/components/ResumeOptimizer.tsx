@@ -51,7 +51,7 @@ const ResumeOptimizer = () => {
       formData.append("resume", resumeFile);
 
       const response = await fetch(
-        "https://n8n.n8n-flm.in/webhook-test/bcf28816-9172-4992-b15a-66383cffdf51",
+        "https://n8n.n8n-flm.in/webhook/bcf28816-9172-4992-b15a-66383cffdf51",
         {
           method: "POST",
           body: formData,
