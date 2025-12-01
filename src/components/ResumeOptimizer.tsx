@@ -51,9 +51,12 @@ const ResumeOptimizer = () => {
       formData.append("resume", resumeFile);
 
       const response = await fetch(
-        "https://n8n.n8n-flm.in/webhook/bcf28816-9172-4992-b15a-66383cffdf51",
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-resume`,
         {
           method: "POST",
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
           body: formData,
         }
       );
