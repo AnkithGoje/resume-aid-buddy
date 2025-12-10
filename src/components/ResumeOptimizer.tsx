@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { Upload, FileText, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import ResultsDisplay from "./ResultsDisplay";
-
 const ResumeOptimizer = () => {
   const [targetRole, setTargetRole] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -16,55 +15,43 @@ const ResumeOptimizer = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const maxSize = 10 * 1024 * 1024; // 10MB
-      
+
       if (file.size > maxSize) {
         toast.error("File size must be less than 10MB");
         return;
       }
-      
       setResumeFile(file);
       toast.success("Resume uploaded successfully");
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!targetRole || !resumeFile) {
       toast.error("Please fill in target role and upload your resume");
       return;
     }
-
     setIsLoading(true);
     setResults(null);
-
     try {
       const formData = new FormData();
       formData.append("targetRole", targetRole);
       if (jobDescription) formData.append("jobDescription", jobDescription);
       if (experienceLevel) formData.append("experienceLevel", experienceLevel);
       formData.append("resume", resumeFile);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-resume`,
-        {
-          method: "POST",
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: formData,
-        }
-      );
-
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-resume`, {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        },
+        body: formData
+      });
       if (!response.ok) {
         throw new Error("Failed to process resume");
       }
-
       const data = await response.json();
       setResults(data[0]?.output || data);
       toast.success("Resume optimized successfully!");
@@ -75,18 +62,15 @@ const ResumeOptimizer = () => {
       setIsLoading(false);
     }
   };
-
   if (results) {
     return <ResultsDisplay results={results} onReset={() => setResults(null)} />;
   }
-
-  return (
-    <div className="min-h-screen bg-background py-12 px-4">
+  return <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 text-sm text-secondary mb-4">
             <Sparkles className="w-4 h-4" />
-            <span className="font-medium">Trusted by 40,000+ students</span>
+            <span className="font-medium">Trusted by 1,000,000+ students</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Land Your Dream Job with a{" "}
@@ -132,13 +116,7 @@ const ResumeOptimizer = () => {
                   <p className="text-sm text-muted-foreground mb-3">
                     What position are you applying for?
                   </p>
-                  <Input
-                    id="targetRole"
-                    placeholder="e.g., Software Developer, Data Analyst, Marketing Head"
-                    value={targetRole}
-                    onChange={(e) => setTargetRole(e.target.value)}
-                    className="w-full"
-                  />
+                  <Input id="targetRole" placeholder="e.g., Software Developer, Data Analyst, Marketing Head" value={targetRole} onChange={e => setTargetRole(e.target.value)} className="w-full" />
                 </div>
               </div>
             </div>
@@ -155,13 +133,7 @@ const ResumeOptimizer = () => {
                   <p className="text-sm text-muted-foreground mb-3">
                     Paste the full job description so we can tailor your resume perfectly.
                   </p>
-                  <Textarea
-                    id="jobDescription"
-                    placeholder="Paste the job description here"
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    className="w-full min-h-[150px] resize-y"
-                  />
+                  <Textarea id="jobDescription" placeholder="Paste the job description here" value={jobDescription} onChange={e => setJobDescription(e.target.value)} className="w-full min-h-[150px] resize-y" />
                 </div>
               </div>
             </div>
@@ -206,55 +178,36 @@ const ResumeOptimizer = () => {
                     Upload your resume (PDF or DOC/DOCX, max 10MB)
                   </p>
                   <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-                    <input
-                      type="file"
-                      id="resumeFile"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
+                    <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" onChange={handleFileChange} className="hidden" />
                     <label htmlFor="resumeFile" className="cursor-pointer">
                       <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                      {resumeFile ? (
-                        <div>
+                      {resumeFile ? <div>
                           <p className="font-medium text-foreground">{resumeFile.name}</p>
                           <p className="text-sm text-muted-foreground mt-1">
                             Click to upload a different file
                           </p>
-                        </div>
-                      ) : (
-                        <div>
+                        </div> : <div>
                           <p className="font-medium text-foreground">
                             Drop your resume here, or click to browse
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">
                             PDF or DOC/DOCX – Maximum 10MB
                           </p>
-                        </div>
-                      )}
+                        </div>}
                     </label>
                   </div>
                 </div>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full text-lg py-6"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
+            <Button type="submit" size="lg" className="w-full text-lg py-6" disabled={isLoading}>
+              {isLoading ? <>
                   <Sparkles className="w-5 h-5 mr-2 animate-spin" />
                   Processing Your Resume...
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Upload className="w-5 h-5 mr-2" />
                   Submit for Review
-                </>
-              )}
+                </>}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
@@ -263,8 +216,6 @@ const ResumeOptimizer = () => {
           </form>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ResumeOptimizer;
