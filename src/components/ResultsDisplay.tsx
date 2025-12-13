@@ -1,9 +1,12 @@
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, Star, TrendingUp } from "lucide-react";
+import { ArrowLeft, CheckCircle, Star, TrendingUp, Download, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface ResultsDisplayProps {
   results: any;
@@ -11,12 +14,64 @@ interface ResultsDisplayProps {
 }
 
 const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
+  const resumeRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   const {
     initial_resume_quality_rating,
     strategic_assessment,
     optimized_resume,
     final_quality_scores,
   } = results;
+
+  const handleDownloadPdf = async () => {
+    if (!resumeRef.current) return;
+
+    setIsGeneratingPdf(true);
+    try {
+      const canvas = await html2canvas(resumeRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      
+      let heightLeft = imgHeight * ratio;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, "PNG", imgX, position, imgWidth * ratio, imgHeight * ratio);
+      heightLeft -= pdfHeight;
+
+      // Add additional pages if content overflows
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight * ratio;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", imgX, position, imgWidth * ratio, imgHeight * ratio);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save("optimized-resume.pdf");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
@@ -141,33 +196,32 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
         <Card className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Your Optimized Resume</h2>
-            <Button
-              onClick={() => {
-                const content = typeof optimized_resume === 'string' ? optimized_resume : optimized_resume?.content;
-                const blob = new Blob([content], { type: "text/markdown" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "optimized-resume.md";
-                a.click();
-              }}
-            >
-              Download Resume
+            <Button onClick={handleDownloadPdf} disabled={isGeneratingPdf}>
+              {isGeneratingPdf ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isGeneratingPdf ? "Generating..." : "Download PDF"}
             </Button>
           </div>
           
-          <div className="prose prose-sm max-w-none">
+          <div 
+            ref={resumeRef} 
+            className="prose prose-sm max-w-none bg-white text-black p-8 rounded-lg"
+            style={{ fontFamily: "Georgia, serif" }}
+          >
             <ReactMarkdown
               components={{
-                h1: ({ children }) => <h1 className="text-3xl font-bold mb-4">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-2xl font-bold mt-6 mb-3">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-xl font-semibold mt-4 mb-2">{children}</h3>,
-                p: ({ children }) => <p className="mb-3 text-foreground">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
-                li: ({ children }) => <li className="text-foreground">{children}</li>,
-                strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                h1: ({ children }) => <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px", color: "#000", borderBottom: "2px solid #333", paddingBottom: "8px" }}>{children}</h1>,
+                h2: ({ children }) => <h2 style={{ fontSize: "18px", fontWeight: "bold", marginTop: "24px", marginBottom: "12px", color: "#222", borderBottom: "1px solid #ccc", paddingBottom: "4px" }}>{children}</h2>,
+                h3: ({ children }) => <h3 style={{ fontSize: "16px", fontWeight: "600", marginTop: "16px", marginBottom: "8px", color: "#333" }}>{children}</h3>,
+                p: ({ children }) => <p style={{ marginBottom: "12px", color: "#333", lineHeight: "1.6" }}>{children}</p>,
+                ul: ({ children }) => <ul style={{ listStyleType: "disc", paddingLeft: "24px", marginBottom: "12px" }}>{children}</ul>,
+                li: ({ children }) => <li style={{ color: "#333", marginBottom: "4px", lineHeight: "1.5" }}>{children}</li>,
+                strong: ({ children }) => <strong style={{ fontWeight: "600", color: "#000" }}>{children}</strong>,
                 a: ({ href, children }) => (
-                  <a href={href} className="text-secondary hover:underline">
+                  <a href={href} style={{ color: "#0066cc", textDecoration: "underline" }}>
                     {children}
                   </a>
                 ),
