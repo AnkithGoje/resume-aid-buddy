@@ -5,14 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, CheckCircle, Star, TrendingUp, Download, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import jsPDF from "jspdf";
+import { generateFaangResume } from "@/utils/pdfGenerator";
 
 interface ResultsDisplayProps {
   results: any;
   onReset: () => void;
+  originalFileName?: string;
 }
 
-const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
+const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayProps) => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const {
@@ -25,125 +26,8 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
   const handleDownloadPdf = async () => {
     setIsGeneratingPdf(true);
     try {
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      const contentWidth = pageWidth - margin * 2;
-      let yPosition = margin;
-
       const resumeContent = typeof optimized_resume === 'string' ? optimized_resume : optimized_resume?.content || '';
-      const lines = resumeContent.split('\n');
-
-      const checkPageBreak = (height: number) => {
-        if (yPosition + height > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
-        }
-      };
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        
-        if (!trimmedLine) {
-          yPosition += 4;
-          continue;
-        }
-
-        // H1: Main heading (# or bold name at top)
-        if (trimmedLine.startsWith('# ')) {
-          checkPageBreak(12);
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(18);
-          const text = trimmedLine.replace(/^#\s*/, '');
-          pdf.text(text, margin, yPosition);
-          yPosition += 8;
-          pdf.setDrawColor(60, 60, 60);
-          pdf.setLineWidth(0.5);
-          pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 8;
-        }
-        // H2: Section headings (##)
-        else if (trimmedLine.startsWith('## ')) {
-          checkPageBreak(14);
-          yPosition += 4;
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(13);
-          const text = trimmedLine.replace(/^##\s*/, '').toUpperCase();
-          pdf.text(text, margin, yPosition);
-          yPosition += 5;
-          pdf.setDrawColor(180, 180, 180);
-          pdf.setLineWidth(0.3);
-          pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 6;
-        }
-        // H3: Sub-section headings (###)
-        else if (trimmedLine.startsWith('### ')) {
-          checkPageBreak(10);
-          yPosition += 2;
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(11);
-          const text = trimmedLine.replace(/^###\s*/, '');
-          pdf.text(text, margin, yPosition);
-          yPosition += 6;
-        }
-        // Bullet points
-        else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ') || trimmedLine.startsWith('• ')) {
-          checkPageBreak(8);
-          pdf.setFont("helvetica", "normal");
-          pdf.setFontSize(10);
-          const bulletText = trimmedLine.replace(/^[-*•]\s*/, '');
-          const cleanText = bulletText.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
-          const wrappedLines = pdf.splitTextToSize(cleanText, contentWidth - 8);
-          
-          for (let i = 0; i < wrappedLines.length; i++) {
-            checkPageBreak(5);
-            if (i === 0) {
-              pdf.text('•', margin + 2, yPosition);
-              pdf.text(wrappedLines[i], margin + 8, yPosition);
-            } else {
-              pdf.text(wrappedLines[i], margin + 8, yPosition);
-            }
-            yPosition += 5;
-          }
-          yPosition += 1;
-        }
-        // Bold text (likely job title/company)
-        else if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
-          checkPageBreak(8);
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(11);
-          const text = trimmedLine.replace(/\*\*/g, '');
-          const wrappedLines = pdf.splitTextToSize(text, contentWidth);
-          for (const wrappedLine of wrappedLines) {
-            checkPageBreak(5);
-            pdf.text(wrappedLine, margin, yPosition);
-            yPosition += 5;
-          }
-          yPosition += 2;
-        }
-        // Regular paragraph or mixed content
-        else {
-          checkPageBreak(8);
-          pdf.setFont("helvetica", "normal");
-          pdf.setFontSize(10);
-          const cleanText = trimmedLine.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
-          const wrappedLines = pdf.splitTextToSize(cleanText, contentWidth);
-          for (const wrappedLine of wrappedLines) {
-            checkPageBreak(5);
-            pdf.text(wrappedLine, margin, yPosition);
-            yPosition += 5;
-          }
-          yPosition += 2;
-        }
-      }
-
-      pdf.save("optimized-resume.pdf");
+      generateFaangResume(resumeContent, originalFileName);
     } catch (error) {
       console.error("Error generating PDF:", error);
     } finally {
@@ -215,7 +99,7 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
 
         <Card className="p-6 mb-8">
           <h2 className="text-2xl font-bold mb-4">Strategic Assessment</h2>
-          
+
           <div className="space-y-4 mb-6">
             <div>
               <h3 className="font-semibold mb-2">Key Opportunity Areas</h3>
@@ -283,8 +167,8 @@ const ResultsDisplay = ({ results, onReset }: ResultsDisplayProps) => {
               {isGeneratingPdf ? "Generating..." : "Download PDF"}
             </Button>
           </div>
-          
-          <div 
+
+          <div
             className="prose prose-sm max-w-none bg-white text-black p-8 rounded-lg"
             style={{ fontFamily: "Georgia, serif" }}
           >
