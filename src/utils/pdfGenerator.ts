@@ -94,6 +94,14 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
     let isSkippingSection = false;
     let hasSeenFirstSection = false;
 
+    // Headers to inline bold
+    const INLINE_HEADERS_TO_BOLD = [
+        "Programming Languages:",
+        "Frameworks and Libraries:",
+        "Machine Learning & AI Techniques:",
+        "Soft Skills:"
+    ];
+
     for (const line of lines) {
         let trimmedLine = line.trim();
 
@@ -109,6 +117,16 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
             yPosition += 2; // Small gap for empty lines
             continue;
         }
+
+        // Apply inline bolding for specific headers
+        INLINE_HEADERS_TO_BOLD.forEach(header => {
+            // Case insensitive check
+            const regex = new RegExp(`(${header})`, 'gi');
+            // Only replace if not already bolded
+            if (trimmedLine.match(regex) && !trimmedLine.includes(`**${header}`)) {
+                trimmedLine = trimmedLine.replace(regex, '**$1**');
+            }
+        });
 
         // --- H1: Name (Big, Bold, Centered) ---
         // Treat as Name if it starts with # OR if it's the very first non-empty line

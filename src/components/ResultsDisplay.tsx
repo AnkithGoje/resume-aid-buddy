@@ -61,6 +61,24 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
         continue;
       }
 
+      // Headers to inline bold
+      const INLINE_HEADERS_TO_BOLD = [
+        "Programming Languages:",
+        "Frameworks and Libraries:",
+        "Machine Learning & AI Techniques:",
+        "Soft Skills:"
+      ];
+
+      // Apply inline bolding for specific headers
+      INLINE_HEADERS_TO_BOLD.forEach(header => {
+        // Case insensitive check
+        const regex = new RegExp(`(${header})`, 'gi');
+        // Only replace if not already bolded
+        if (line.match(regex) && !line.includes(`**${header}`)) {
+          line = line.replace(regex, '**$1**');
+        }
+      });
+
       // Skip Contact Info Label
       if (/^Contact Information[:]*$/i.test(line)) continue;
 
