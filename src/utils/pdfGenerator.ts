@@ -118,6 +118,8 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
             continue;
         }
 
+        console.log(`[PDF DEBUG] Line: '${trimmedLine}' | Len: ${trimmedLine.length} | HasSummary: ${trimmedLine.toUpperCase().includes('SUMMARY')} | IsShort: ${trimmedLine.length < 40}`);
+
         // Apply inline bolding for specific headers
         INLINE_HEADERS_TO_BOLD.forEach(header => {
             // Case insensitive check
@@ -177,37 +179,7 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
             yPosition += 6;
         }
 
-        // --- H2: Explicit Handling for Summary (Catch-all) ---
-        // Catch "Professional Summary", "Career Summary", "Summary", "Objective" if they failed strict check
-        // Check if line contains "SUMMARY" or "OBJECTIVE" and is short (< 40 chars)
-        else if (
-            (trimmedLine.toUpperCase().includes('SUMMARY') || trimmedLine.toUpperCase().includes('OBJECTIVE')) &&
-            trimmedLine.length < 40 &&
-            !trimmedLine.includes('|') // Ensure it's not contact info
-        ) {
-            let headerText = 'SUMMARY';
 
-            // Check if it is "LANGUAGES" -> Remove it (just in case)
-            if (trimmedLine.toUpperCase().includes('LANGUAGES')) {
-                isSkippingSection = true;
-                continue;
-            }
-
-            isSkippingSection = false;
-            hasSeenFirstSection = true;
-
-            checkPageBreak(15);
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(11);
-
-            pdf.text(headerText, margin, yPosition);
-
-            yPosition += 2;
-            pdf.setDrawColor(0, 0, 0); // Black line
-            pdf.setLineWidth(0.5);
-            pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-            yPosition += 6;
-        }
 
         // --- H2: Section Headers (Uppercase, Bold, Border) ---
         // Matches "## Header" OR specific keywords like "EXPERIENCE", "SKILLS" etc.
