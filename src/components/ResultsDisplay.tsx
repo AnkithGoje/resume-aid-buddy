@@ -92,10 +92,8 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
 
       // Detect new section to stop skipping
       // Check for Markdown Header OR Exact Uppercase Keyword
-      // Detect new section to stop skipping
-      // Check for Markdown Header OR Exact Uppercase Keyword
-      // Robust cleaning: remove * (bold), : (colon), and # (markdown header), then collapse spaces and trim
-      const cleanLine = line.replace(/[*:#]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+      // Aggressive cleaning: retain only letters and spaces, then collapse spaces and trim
+      const cleanLine = line.toUpperCase().replace(/[^A-Z\s]/g, '').replace(/\s+/g, ' ').trim();
 
       const isHeader = line.startsWith('## ') || SECTION_HEADERS.includes(cleanLine);
 
