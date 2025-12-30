@@ -42,7 +42,9 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
     // Header keywords from pdfGenerator.ts
     const SECTION_HEADERS = [
       'EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE',
-      'SUMMARY', 'PROFILE SUMMARY', 'PROFESSIONAL SUMMARY', 'PROJECTS', 'SKILLS',
+      'SUMMARY', 'PROFILE SUMMARY', 'PROFESSIONAL SUMMARY',
+      'OBJECTIVE', 'CAREER OBJECTIVE',
+      'PROJECTS', 'SKILLS',
       'TECHNICAL SKILLS', 'EDUCATION', 'CERTIFICATIONS',
       'ACHIEVEMENTS'
     ];
@@ -104,7 +106,7 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
         let headerText = cleanLine;
 
         // Normalize Summary headers
-        if (['PROFESSIONAL SUMMARY', 'PROFILE SUMMARY'].includes(headerText)) {
+        if (['PROFESSIONAL SUMMARY', 'PROFILE SUMMARY', 'OBJECTIVE', 'CAREER OBJECTIVE'].includes(headerText)) {
           headerText = 'SUMMARY';
         }
 
