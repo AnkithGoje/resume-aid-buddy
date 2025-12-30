@@ -90,13 +90,16 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
 
       // Detect new section to stop skipping
       // Check for Markdown Header OR Exact Uppercase Keyword
-      const isHeader = line.startsWith('## ') || SECTION_HEADERS.includes(line.replace(/\*/g, '').toUpperCase().trim());
+      // Robust cleaning: remove * (bold), : (colon), and # (markdown header), then trim
+      const cleanLine = line.replace(/[*:#]/g, '').trim().toUpperCase();
+
+      const isHeader = line.startsWith('## ') || SECTION_HEADERS.includes(cleanLine);
 
       if (isHeader) {
         isSkippingSection = false;
         hasSeenFirstSection = true;
 
-        let headerText = line.replace(/^##\s*/, '').replace(/\*/g, '').toUpperCase().trim();
+        let headerText = cleanLine;
 
         // Normalize Summary headers
         if (['PROFESSIONAL SUMMARY', 'PROFILE SUMMARY'].includes(headerText)) {
