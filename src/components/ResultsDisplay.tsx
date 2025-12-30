@@ -42,7 +42,7 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
     // Header keywords from pdfGenerator.ts
     const SECTION_HEADERS = [
       'EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE',
-      'SUMMARY', 'PROFILE SUMMARY', 'PROJECTS', 'SKILLS',
+      'SUMMARY', 'PROFILE SUMMARY', 'PROFESSIONAL SUMMARY', 'PROJECTS', 'SKILLS',
       'TECHNICAL SKILLS', 'EDUCATION', 'CERTIFICATIONS',
       'ACHIEVEMENTS'
     ];
@@ -97,6 +97,12 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
         hasSeenFirstSection = true;
 
         let headerText = line.replace(/^##\s*/, '').replace(/\*/g, '').toUpperCase().trim();
+
+        // Normalize Summary headers
+        if (['PROFESSIONAL SUMMARY', 'PROFILE SUMMARY'].includes(headerText)) {
+          headerText = 'SUMMARY';
+        }
+
         processedLines.push(`## ${headerText}`);
         continue;
       }

@@ -151,13 +151,18 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
             trimmedLine.startsWith('## ') ||
             // Dictionary of all possible section headers (bolded & uppercase)
             // Note: Includes variations like "Summary" vs "Profile Summary" to handle different resume styles
-            ['EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'SUMMARY', 'PROFILE SUMMARY', 'PROJECTS', 'SKILLS', 'TECHNICAL SKILLS', 'EDUCATION', 'CERTIFICATIONS', 'ACHIEVEMENTS', 'LANGUAGES'].includes(trimmedLine.toUpperCase().replace(/\*+/g, '').trim())
+            ['EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'SUMMARY', 'PROFILE SUMMARY', 'PROFESSIONAL SUMMARY', 'PROJECTS', 'SKILLS', 'TECHNICAL SKILLS', 'EDUCATION', 'CERTIFICATIONS', 'ACHIEVEMENTS', 'LANGUAGES'].includes(trimmedLine.toUpperCase().replace(/\*+/g, '').trim())
         ) {
             let headerText = trimmedLine;
             if (headerText.startsWith('## ')) {
                 headerText = headerText.replace(/^##\s*/, '');
             }
             headerText = headerText.replace(/\*/g, '').toUpperCase().trim();
+
+            // Normalize Summary headers
+            if (['PROFESSIONAL SUMMARY', 'PROFILE SUMMARY'].includes(headerText)) {
+                headerText = 'SUMMARY';
+            }
 
             // Check if it is "LANGUAGES" -> Remove it
             if (headerText === 'LANGUAGES') {
