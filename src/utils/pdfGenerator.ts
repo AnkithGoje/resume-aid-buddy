@@ -150,11 +150,14 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
         // --- H2: Explicit Handling for Summary (Catch-all) ---
         // Catch "Professional Summary", "Career Summary", "Summary", "Objective" if they failed strict check
         // Check if line contains "SUMMARY" or "OBJECTIVE" and is short (< 40 chars)
+        // Check if line contains "SUMMARY" or "OBJECTIVE" using alpha-only check
         else if (
-            (trimmedLine.toUpperCase().includes('SUMMARY') || trimmedLine.toUpperCase().includes('OBJECTIVE')) &&
-            trimmedLine.length < 40 &&
+            (trimmedLine.replace(/[^A-Za-z]/g, '').toUpperCase().includes('SUMMARY') ||
+                trimmedLine.replace(/[^A-Za-z]/g, '').toUpperCase().includes('OBJECTIVE')) &&
+            trimmedLine.length < 50 &&
             !trimmedLine.includes('|') // Ensure it's not contact info
         ) {
+            console.log("Matched Fallback Summary Check for line: " + trimmedLine);
             let headerText = 'SUMMARY';
 
             // Check if it is "LANGUAGES" -> Remove it (just in case)
