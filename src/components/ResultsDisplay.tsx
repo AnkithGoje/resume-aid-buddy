@@ -90,6 +90,14 @@ const ResultsDisplay = ({ results, onReset, originalFileName }: ResultsDisplayPr
         continue;
       }
 
+      // Explicit Handling for Summary (Catch-all)
+      if ((line.toUpperCase().includes('SUMMARY') || line.toUpperCase().includes('OBJECTIVE')) && line.length < 40 && !line.includes('|')) {
+        isSkippingSection = false;
+        hasSeenFirstSection = true;
+        processedLines.push(`## SUMMARY`);
+        continue;
+      }
+
       // Detect new section to stop skipping
       // Check for Markdown Header OR Exact Uppercase Keyword
       // Aggressive cleaning: retain only letters and spaces, then collapse spaces and trim
