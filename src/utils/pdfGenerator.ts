@@ -154,7 +154,7 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
         else if (
             (trimmedLine.replace(/[^A-Za-z]/g, '').toUpperCase().includes('SUMMARY') ||
                 trimmedLine.replace(/[^A-Za-z]/g, '').toUpperCase().includes('OBJECTIVE')) &&
-            trimmedLine.length < 50 &&
+            trimmedLine.length < 60 && // Slightly increased from 50
             !trimmedLine.includes('|') // Ensure it's not contact info
         ) {
             console.log("Matched Fallback Summary Check for line: " + trimmedLine);
@@ -345,7 +345,8 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
                 yPosition += 5;
             }
             // HEADLINE / JOB TITLE CENTERED (If before first section)
-            else if (hasProcessedName && !hasSeenFirstSection) {
+            // MUST be short (< 60 chars) to avoid centering paragraphs
+            else if (hasProcessedName && !hasSeenFirstSection && cleanText.length < 60) {
                 pdf.setFont("helvetica", "bold");
                 // Bold or Normal? User said "move data analyst to center", bold looks better for headline
                 pdf.setFontSize(11);
