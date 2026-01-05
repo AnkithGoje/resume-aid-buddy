@@ -347,6 +347,7 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
             // HEADLINE / JOB TITLE CENTERED (If before first section)
             // MUST be short (< 60 chars) to avoid centering paragraphs
             else if (hasProcessedName && !hasSeenFirstSection && cleanText.length < 60) {
+                console.log(`[PDF DEBUG] Centered Headline: "${cleanText}" (Len: ${cleanText.length})`);
                 pdf.setFont("helvetica", "bold");
                 // Bold or Normal? User said "move data analyst to center", bold looks better for headline
                 pdf.setFontSize(11);
@@ -357,6 +358,7 @@ export const generateFaangResume = (content: string, originalFileName?: string) 
                 yPosition += 6;
             }
             else {
+                console.log(`[PDF DEBUG] Standard Body Text: "${cleanText.substring(0, 20)}..." (Len: ${cleanText.length})`);
                 // Use new renderStyledText for standard paragraphs
                 yPosition = renderStyledText(cleanText, margin, yPosition, contentWidth, 10);
             }
